@@ -1,12 +1,12 @@
 {
-  "schema":"https://deno.land/x/denon/schema.json",
-  "scripts":{
-    "start":{
-      "cmd:":"deno run server.ts",
-      "allow":[
-        "env",
-        "net"
-      ]
-    }
+  "allow": [ "env", "net" ],
+  "$schema":"https://deno.land/x/denon/schema.json",
+  "env": { "TOKEN":"xyz" },
+  "scripts": {
+    "start": {
+      "cmd": "deno run server.ts",
+      "env": { "PORT":"5000" }
+    },
+  "logger":{ "debug": true }
   }
 }

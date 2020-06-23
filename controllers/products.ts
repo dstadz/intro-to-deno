@@ -1,5 +1,11 @@
+import { Client } from "https://deno.land/x/postgres/mod.ts";
 import { v4 } from 'https://deno.land/std/uuid/mod.ts'
+
+import { dbCreds } from '../config.ts'
 import { Product } from '../types.ts'
+
+//init client
+const client = new Client(dbCreds)
 
 //list of products
 let products = [
@@ -49,6 +55,7 @@ const getProduct = ({ params, response }: { params: { id: string}, response: any
 // @route Post /api/v1/products
 const addProduct = async ({ request, response }: { request: any, response: any }) => {
   const body = await request.body()
+  const product = body.value
 
   if(!request.hasBody) {
     response.status = 404
@@ -57,14 +64,28 @@ const addProduct = async ({ request, response }: { request: any, response: any }
       msg: 'no data'
     }
   } else {
-    const product: Product = body.value
-    product.id = v4.generate()
-    products.push(product)
+    try {
+      await client.connect()
 
-    response.status = 200
-    response.body = {
-      success: true,
-      data: product
+      const result = await client.query("INSERT INTO products(name, description, price) VALUES($1, $2, $3)",
+      product.name,
+      product.description,
+      product.price
+      )
+
+      response.status = 201
+      response.body = {
+        success: true,
+        data: product
+      }
+    } catch (err) {
+      response.status = 500
+      response.body = {
+        success: false,
+        msg: err.toString()
+      }
+    } finally {
+      await client.end()
     }
   }
 }
